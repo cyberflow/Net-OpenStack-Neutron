@@ -1,5 +1,0 @@
-libnet-openstack-neutron-perl (0.01-1) UNRELEASED; urgency=low
-
-  * Initial Release.
-
- -- Dmitry Ryobryshkin <dmitry.r@cyberflow.net>  Thu, 5 Jun 2014 12:12:20 +0300

@@ -4,3 +4,4 @@ MANIFEST
 README
 t/Net-OpenStack-Neutron.t
 lib/Net/OpenStack/Neutron.pm
+lib/Net/OpenStack/AuthRole.pm
