@@ -16,16 +16,23 @@ INSTALLATION
 
 To install this module type the following:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+    perl Makefile.PL
+    make   
+    make install
+
+To make debian package
+	
+	perl Makefile.PL; make metafile
+	dh-make-perl Net-OpenStack-Neutron-<version> --build
 
 DEPENDENCIES
 
 This module requires these other modules and libraries:
 
-  blah blah blah
+  Moose
+  HTTP::Request
+  JSON
+  LWP
 
 COPYRIGHT AND LICENCE
 
