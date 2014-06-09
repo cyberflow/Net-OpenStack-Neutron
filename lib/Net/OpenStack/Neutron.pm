@@ -22,7 +22,7 @@ use Carp;
 use LWP;
 use JSON qw(from_json to_json);
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 has auth_url     => (is => 'rw', required => 1);
 has user         => (is => 'ro', required => 1);
@@ -98,12 +98,43 @@ sub agent_list {
     return from_json($res->content)->{agents};
 }
 
+sub port_list {
+    my ($self, %params) = @_;
+    my $q = _get_query(%params);
+    my $res = $self->_get("/v2.0/ports", $q);
+    return from_json($res->content)->{ports};   
+}
+
 sub agent_show {
     my ($self, $id) = @_;
     croak "The agent id is needed" unless $id;
     my $res = $self->_get("/v2.0/agents/$id");
     return undef unless $res->is_success;
     return from_json($res->content)->{agent};
+}
+
+sub l3_agent_list_hosting_router {
+    my ($self, $id) = @_;
+    croak "The agent id is needed" unless $id;
+    my $res = $self->_get("/v2.0/agents/$id/l3-routers");
+    return undef unless $res->is_success;
+    return from_json($res->content)->{routers};
+}
+
+sub router_port_list {
+    my ($self, $id) = @_;
+    croak "The router id is needed" unless $id;
+    my $res = $self->_get("/v2.0/ports.json?device_id=$id");
+    return undef unless $res->is_success;
+    return from_json($res->content)->{ports};
+}
+
+sub host_port_list {
+    my ($self, $host) = @_;
+    croak "The host name is needed" unless $host;
+    my $res = $self->_get("/v2.0/ports.json?binding:host_id=$host");
+    return undef unless $res->is_success;
+    return from_json($res->content)->{ports};
 }
 
 sub _url {
@@ -235,11 +266,29 @@ Optional query string to be appended to requests.
 
 Returns an arrayref of all the agents.
 
+=head2 port_list
+
+    port_list($id)
+
+Returns an arrayref of all the ports.
+
 =head2 agent_show
  
     agent_show($id)
  
 Returns the agent with the given id or false if it doesn't exist.
+
+=head2 l3_agent_list_hosting_router
+    
+    l3_agent_list_hosting_router($id)
+
+Returns the routers which host on l3-agent with the given id or false if it doesn't exist.
+
+=head2 router_port_list
+
+    router_port_list($id)
+
+List ports that belong to a given tenant, with specified id router or false if it doesn't exist.
 
 =head1 SEE ALSO
 
