@@ -113,6 +113,14 @@ sub agent_show {
     return from_json($res->content)->{agent};
 }
 
+sub router_show {
+    my ($self, $id) = @_;
+    croak "The router id is needed" unless $id;
+    my $res = $self->_get("/v2.0/routers/$id");
+    return undef unless $res->is_success;
+    return from_json($res->content)->{router};
+}
+
 sub l3_agent_list_hosting_router {
     my ($self, $id) = @_;
     croak "The agent id is needed" unless $id;
@@ -137,6 +145,19 @@ sub host_port_list {
     return from_json($res->content)->{ports};
 }
 
+sub l3_agent_router_remove {
+    my ($self, $agent_id, $router_id) = @_;
+    $self->_delete($self->_url("/v2.0/agents/$agent_id/l3-routers/$router_id"));
+    return 1;
+}
+
+sub l3_agent_router_add {
+    my ($self, $agent_id, $router_id) = @_;
+    my $res = $self->_post("/v2.0/agents/$agent_id/l3-routers", { router_id => $router_id });
+    return undef unless $res->is_success;
+    return 1;
+}
+
 sub _url {
     my ($self, $path, $is_detail, $query) = @_;
     my $url = $self->base_url . $path;
@@ -151,6 +172,21 @@ sub _get {
     return $self->_agent->get($self->_url($url));
 }
 
+sub _delete {
+    my ($self, $url) = @_;
+    my $req = HTTP::Request->new(DELETE => $url);
+    return $self->_agent->request($req);
+}
+
+sub _post {
+    my ($self, $url, $data) = @_;
+    return $self->_agent->post(
+        $self->_url($url),
+        content_type => 'application/json',
+        content      => to_json($data),
+    );
+}
+
 sub _check_res {
     my ($res) = @_;
     die $res->status_line . "\n" . $res->content
@@ -158,7 +194,7 @@ sub _check_res {
     return 1;
 }
 
-around qw( _get ) => sub {
+around qw( _get _delete _post ) => sub {
     my $orig = shift;
     my $self = shift;
     my $res = $self->$orig(@_);
@@ -289,6 +325,18 @@ Returns the routers which host on l3-agent with the given id or false if it does
     router_port_list($id)
 
 List ports that belong to a given tenant, with specified id router or false if it doesn't exist.
+
+=head2 l3_agent_router_remove
+
+    l3_agent_router_remove($agent_id,$router_id)
+
+Remove a router from a L3 agent.
+
+=head2 l3_agent_router_add
+
+    l3_agent_router_add($agent_id,$router_id)
+
+Add a router to a L3 agent.
 
 =head1 SEE ALSO
 
