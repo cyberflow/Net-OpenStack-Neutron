@@ -16,72 +16,68 @@ use warnings;
 
 package Net::OpenStack::Neutron;
 use Moose;
+#use Net::OpenStack::Compute qw(_get_query);
 use 5.014002;
 
 use Carp;
 use LWP;
 use JSON qw(from_json to_json);
 
-our $VERSION = '0.02';
+extends qw(Net::OpenStack::Compute);
 
-has auth_url     => (is => 'rw', required => 1);
-has user         => (is => 'ro', required => 1);
-has password     => (is => 'ro', required => 1);
-has tenant   	 => (is => 'ro', required => 1);
-has service_name => (is => 'ro', default => 'neutron');
-has region       => (is => 'ro');
-has verify_ssl   => (is => 'ro', default => 1);
-has verbose      => (is => 'rw', default => 0);
+our $VERSION = '0.03';
+
+has +service_name => (is => 'ro', default => 'neutron');
  
-has base_url => (
-    is      => 'rw',
-    lazy    => 1,
-    default => sub { shift->_auth_info->{base_url} },
-    writer  => '_set_base_url',
-);
-has token => (
-    is      => 'ro',
-    lazy    => 1,
-    default => sub { shift->_auth_info->{token} },
-);
-has _auth_info => (
-    is => 'ro', 
-    lazy => 1, 
-    builder => '_build_auth_info',
-);
+# has base_url => (
+#     is      => 'rw',
+#     lazy    => 1,
+#     default => sub { shift->_auth_info->{base_url} },
+#     writer  => '_set_base_url',
+# );
+# has token => (
+#     is      => 'ro',
+#     lazy    => 1,
+#     default => sub { shift->_auth_info->{token} },
+# );
+# has _auth_info => (
+#     is => 'ro', 
+#     lazy => 1, 
+#     builder => '_build_auth_info',
+# );
  
-has _agent => (
-    is => 'ro',
-    lazy => 1,
-    default => sub {
-        my $self = shift;
-        my $agent = LWP::UserAgent->new(
-            ssl_opts => { verify_hostname => $self->verify_ssl });
-        return $agent;
-    },
-);
+# has _agent => (
+#     is => 'ro',
+#     lazy => 1,
+#     default => sub {
+#         my $self = shift;
+#         my $agent = LWP::UserAgent->new(
+#             ssl_opts => { verify_hostname => $self->verify_ssl });
+#         return $agent;
+#     },
+# );
 
 with 'Net::OpenStack::AuthRole';
 
-sub BUILD {
-    my ($self) = @_;
-    # Make sure trailing slashes are removed from auth_url
-    my $auth_url = $self->auth_url;
-    $auth_url =~ s|/+$||;
-    $self->auth_url($auth_url);
-}
+# sub BUILD {
+#     my ($self) = @_;
+#     # Make sure trailing slashes are removed from auth_url
+#     my $auth_url = $self->auth_url;
+#     $auth_url =~ s|/+$||;
+#     $self->auth_url($auth_url);
+# }
 
-sub set_base_url {
-    my ($self, $url) = @_;
-    return $self->_set_base_url($url);
-}
+# sub set_base_url {
+#     my ($self, $url) = @_;
+#     return $self->_set_base_url($url);
+# }
 
-sub _build_auth_info {
-    my ($self) = @_;
-    my $auth_info = $self->get_auth_info();
-    $self->_agent->default_header(x_auth_token => $auth_info->{token});
-    return $auth_info;
-}
+# sub _build_auth_info {
+#     my ($self) = @_;
+#     my $auth_info = $self->get_auth_info();
+#     $self->_agent->default_header(x_auth_token => $auth_info->{token});
+#     return $auth_info;
+# }
 
 sub _get_query {
     my %params = @_;
@@ -158,49 +154,49 @@ sub l3_agent_router_add {
     return 1;
 }
 
-sub _url {
-    my ($self, $path, $is_detail, $query) = @_;
-    my $url = $self->base_url . $path;
-    $url .= '/detail' if $is_detail;
-    $url .= $query if $query;
-    say "_url: ".$url if $self->verbose == 1;
-    return $url;
-}
+# sub _url {
+#     my ($self, $path, $is_detail, $query) = @_;
+#     my $url = $self->base_url . $path;
+#     $url .= '/detail' if $is_detail;
+#     $url .= $query if $query;
+#     #say "_url: ".$url if $self->verbose == 1;
+#     return $url;
+# }
 
 sub _get {
     my ($self, $url) = @_;
     return $self->_agent->get($self->_url($url));
 }
 
-sub _delete {
-    my ($self, $url) = @_;
-    my $req = HTTP::Request->new(DELETE => $url);
-    return $self->_agent->request($req);
-}
+# sub _delete {
+#     my ($self, $url) = @_;
+#     my $req = HTTP::Request->new(DELETE => $url);
+#     return $self->_agent->request($req);
+# }
 
-sub _post {
-    my ($self, $url, $data) = @_;
-    return $self->_agent->post(
-        $self->_url($url),
-        content_type => 'application/json',
-        content      => to_json($data),
-    );
-}
+# sub _post {
+#     my ($self, $url, $data) = @_;
+#     return $self->_agent->post(
+#         $self->_url($url),
+#         content_type => 'application/json',
+#         content      => to_json($data),
+#     );
+# }
 
-sub _check_res {
-    my ($res) = @_;
-    die $res->status_line . "\n" . $res->content
-        if ! $res->is_success and $res->code != 404;
-    return 1;
-}
+# sub _check_res {
+#     my ($res) = @_;
+#     die $res->status_line . "\n" . $res->content
+#         if ! $res->is_success and $res->code != 404;
+#     return 1;
+# }
 
-around qw( _get _delete _post ) => sub {
-    my $orig = shift;
-    my $self = shift;
-    my $res = $self->$orig(@_);
-    _check_res($res);
-    return $res;
-};
+# around qw( _get _delete _post ) => sub {
+#     my $orig = shift;
+#     my $self = shift;
+#     my $res = $self->$orig(@_);
+#     _check_res($res);
+#     return $res;
+# };
 
 # Preloaded methods go here.
 
@@ -210,7 +206,7 @@ __END__
 
 =head1 NAME
 
-Net::OpenStack::Neutron - Bindings for the OpenStack Neutron API
+Net::OpenStack::Neutron - Bindings for the OpenStack Neutron API 2.0
 
 =head1 SYNOPSIS
 
