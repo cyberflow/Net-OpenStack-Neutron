@@ -1,31 +1,7 @@
-use Test::Most tests => 5;
+use Test::Most tests => 1;
  
 use Net::OpenStack::Neutron;
  
-throws_ok(
-    sub { Net::OpenStack::Neutron->new },
-    qr(Attribute \S+ is required),
-    'instantiation with no argument throws an exception'
-);
-
-throws_ok(
-    sub { Net::OpenStack::Neutron->new( auth_url => 'foo' ) },
-    qr(Attribute \S+ is required),
-    'instantiation with only auth_url argument throws an exception'
-);
-
-throws_ok(
-    sub { Net::OpenStack::Neutron->new( auth_url => 'foo', user => 'bar' ) },
-    qr(Attribute \S+ is required),
-    'instantiation with only auth_url, user arguments throws an exception'
-);
-
-throws_ok(
-    sub { Net::OpenStack::Neutron->new( auth_url => 'foo', user => 'bar', password => 'foobar' ) },
-    qr(Attribute \S+ is required),
-    'instantiation with only auth_url, user, password arguments throws an exception'
-);
-
 subtest 'Bad json response' => sub {
  
     my $neutron = Net::OpenStack::Neutron->new(

@@ -29,34 +29,6 @@ our $VERSION = '0.03';
 
 has +service_name => (is => 'ro', default => 'neutron');
  
-# has base_url => (
-#     is      => 'rw',
-#     lazy    => 1,
-#     default => sub { shift->_auth_info->{base_url} },
-#     writer  => '_set_base_url',
-# );
-# has token => (
-#     is      => 'ro',
-#     lazy    => 1,
-#     default => sub { shift->_auth_info->{token} },
-# );
-# has _auth_info => (
-#     is => 'ro', 
-#     lazy => 1, 
-#     builder => '_build_auth_info',
-# );
- 
-# has _agent => (
-#     is => 'ro',
-#     lazy => 1,
-#     default => sub {
-#         my $self = shift;
-#         my $agent = LWP::UserAgent->new(
-#             ssl_opts => { verify_hostname => $self->verify_ssl });
-#         return $agent;
-#     },
-# );
-
 with 'Net::OpenStack::AuthRole';
 
 # sub BUILD {
@@ -65,11 +37,6 @@ with 'Net::OpenStack::AuthRole';
 #     my $auth_url = $self->auth_url;
 #     $auth_url =~ s|/+$||;
 #     $self->auth_url($auth_url);
-# }
-
-# sub set_base_url {
-#     my ($self, $url) = @_;
-#     return $self->_set_base_url($url);
 # }
 
 # sub _build_auth_info {
@@ -154,49 +121,49 @@ sub l3_agent_router_add {
     return 1;
 }
 
-# sub _url {
-#     my ($self, $path, $is_detail, $query) = @_;
-#     my $url = $self->base_url . $path;
-#     $url .= '/detail' if $is_detail;
-#     $url .= $query if $query;
-#     #say "_url: ".$url if $self->verbose == 1;
-#     return $url;
-# }
+sub _url {
+    my ($self, $path, $is_detail, $query) = @_;
+    my $url = $self->base_url . $path;
+    $url .= '/detail' if $is_detail;
+    $url .= $query if $query;
+    #say "_url: ".$url if $self->verbose == 1;
+    return $url;
+}
 
 sub _get {
     my ($self, $url) = @_;
     return $self->_agent->get($self->_url($url));
 }
 
-# sub _delete {
-#     my ($self, $url) = @_;
-#     my $req = HTTP::Request->new(DELETE => $url);
-#     return $self->_agent->request($req);
-# }
+sub _delete {
+    my ($self, $url) = @_;
+    my $req = HTTP::Request->new(DELETE => $url);
+    return $self->_agent->request($req);
+}
 
-# sub _post {
-#     my ($self, $url, $data) = @_;
-#     return $self->_agent->post(
-#         $self->_url($url),
-#         content_type => 'application/json',
-#         content      => to_json($data),
-#     );
-# }
+sub _post {
+    my ($self, $url, $data) = @_;
+    return $self->_agent->post(
+        $self->_url($url),
+        content_type => 'application/json',
+        content      => to_json($data),
+    );
+}
 
-# sub _check_res {
-#     my ($res) = @_;
-#     die $res->status_line . "\n" . $res->content
-#         if ! $res->is_success and $res->code != 404;
-#     return 1;
-# }
+sub _check_res {
+    my ($res) = @_;
+    die $res->status_line . "\n" . $res->content
+        if ! $res->is_success and $res->code != 404;
+    return 1;
+}
 
-# around qw( _get _delete _post ) => sub {
-#     my $orig = shift;
-#     my $self = shift;
-#     my $res = $self->$orig(@_);
-#     _check_res($res);
-#     return $res;
-# };
+around qw( _get _delete _post ) => sub {
+    my $orig = shift;
+    my $self = shift;
+    my $res = $self->$orig(@_);
+    _check_res($res);
+    return $res;
+};
 
 # Preloaded methods go here.
 
