@@ -12,13 +12,9 @@ WriteMakefile(
         "JSON" => 0,
         "LWP" => 0,
         "Test::Most" => 0,
-        # "Test::Class" => 0,
-        # "Test::MockModule" => 0,
-        # "Test::MockObject" => 0,
-        # "Test::MockObject::Extends" => 0,
-        # "Devel::StackTrace" => 0,
+        "Net::OpenStack::Compute" => 0,        
     }, 
-    ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
+    ($] >= 5.005 ?     
       (ABSTRACT_FROM  => 'lib/Net/OpenStack/Neutron.pm', # retrieve abstract from module
        AUTHOR         => 'Dmitry <dmitry.r\@cyberflow.net>') : ()),
 );

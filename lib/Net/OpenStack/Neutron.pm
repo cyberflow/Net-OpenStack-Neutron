@@ -23,13 +23,14 @@ use Carp;
 use LWP;
 use JSON qw(from_json to_json);
 
-extends qw(Net::OpenStack::Compute);
+extends 'Net::OpenStack::Compute';
 
 our $VERSION = '0.03';
 
 has +service_name => (is => 'ro', default => 'neutron');
+has verbose => (is => 'rw', default => 0);
  
-with 'Net::OpenStack::AuthRole';
+with 'Net::OpenStack::Neutron::AuthRole';
 
 # sub BUILD {
 #     my ($self) = @_;
@@ -126,7 +127,7 @@ sub _url {
     my $url = $self->base_url . $path;
     $url .= '/detail' if $is_detail;
     $url .= $query if $query;
-    #say "_url: ".$url if $self->verbose == 1;
+    say "_url: ".$url if $self->verbose == 1;
     return $url;
 }
 

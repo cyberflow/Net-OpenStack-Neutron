@@ -5,3 +5,4 @@ README
 t/Net-OpenStack-Neutron.t
 t/01-basic.t
 lib/Net/OpenStack/Neutron.pm
+lib/Net/OpenStack/Neutron/AuthRole.pm
